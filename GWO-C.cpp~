@@ -1,0 +1,151 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "rand.h"
+ 
+#define L 17
+#define NGENES 1
+#define GMAX 100
+#define CR 0.8
+#define MR 1.0/L
+#define M 100
+#define LB 0
+#define UB 10.0
+ 
+typedef struct Individual{
+    int chromosome[L];
+    double phenotype;
+    double fitness;
+};
+ 
+Individual pop[M], new_pop[M], best_individual;
+ 
+double
+decode(int index){
+    double sum=0.0;
+    size_t i;
+    for(i = 0; i < L; ++i)
+    {
+        sum +=  ldexp(pop[index].chromosome[i],i);
+    }
+    return sum;
+}
+ 
+double
+function(int index){
+    pop[index].phenotype = decode(index);
+    return (pop[index].phenotype * pop[index].phenotype)*-1.0;
+}
+ 
+void
+initialize(){
+    size_t i;
+    size_t j;
+    for(i = 0; i < M; ++i)
+    {
+        for(j = 0; j < L; ++j)
+        {
+            pop[i].chromosome[j] = rndint(0,1);
+        }
+        pop[i].fitness = function(i);
+        if(i==0 || pop[i].fitness > best_individual.fitness){
+            best_individual = pop[i];
+        }
+    }
+}
+ 
+void
+selection(){ //torneo binario
+    size_t i;
+    for(i = 0; i < M; ++i)
+    {
+        int a = rndint(0,M-1);
+        int b = rndint(0,M-1);
+        if ( pop[a].fitness > pop[b].fitness) {
+            new_pop[i] = pop[a];
+        }
+        else new_pop[i] = pop[b];
+    }
+}
+ 
+void
+xover_and_mutation(){
+    double tmp[L];
+    int xover_point;
+    size_t i;
+    for(i = 0; i < M; ++i)
+    {
+        if(flip(CR)==1){
+            xover_point = rndint(1,L-2);
+            memcpy(tmp,new_pop[i].chromosome,sizeof(int)*xover_point);
+            memcpy(new_pop[i].chromosome,new_pop[i+1].chromosome,sizeof(int)*xover_point);
+            memcpy(new_pop[i+1].chromosome,tmp,sizeof(int)*xover_point);
+        }
+        size_t j;
+        for(j = 0; j< L; ++j)
+            if(flip(MR)==1)
+                new_pop[i].chromosome[j] = 1-new_pop[i].chromosome[j];
+                 
+        for(j = 0; j< L; ++j)
+            if(flip(MR)==1)
+                new_pop[i+1].chromosome[j] = 1-new_pop[i+1].chromosome[j];
+    }
+}
+ 
+void
+evaluate_population(){
+    size_t i;
+    for(i = 0; i < M; ++i)
+    {
+        pop[i].fitness = function(i);
+        if(pop[i].fitness > best_individual.fitness){
+            best_individual = pop[i];
+        }
+    }
+}
+ 
+void
+elitism(){
+    int tmp = rndint(1,M-1);
+    pop[tmp] = best_individual;
+}
+ 
+void new_generation(){
+    memcpy(pop,new_pop,sizeof(Individual)*M);
+}
+ 
+void print_results(){
+    printf("%f\n",best_individual.fitness);
+    size_t i;
+    for(i = 0; i < L; ++i)
+    {
+        printf("%i",best_individual.chromosome[i]);
+    }
+    printf("\n");
+}
+void
+genetic_algorithm(){
+    initialize();
+    size_t i;
+    for(i = 0; i < GMAX; ++i)
+    {
+        selection();
+        xover_and_mutation();
+        new_generation();
+        elitism();
+        evaluate_population();
+        printf("%f\n",best_individual.fitness);
+    }
+    print_results();
+}
+ 
+ 
+ 
+ 
+int main (int argc, char const *argv[])
+{
+    srand(time(0));
+    genetic_algorithm();
+    return 0;
+}
