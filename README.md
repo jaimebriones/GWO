@@ -1,7 +1,7 @@
 GWO
 ===
 
-GRay Wolf Optimizer implementation on C using RngStream.c for multiple streams of Random Numbers by Pierre L'Ecuyer
+Gray Wolf Optimizer implementation on C using RngStream.c for multiple streams of Random Numbers by Pierre L'Ecuyer
 
 Programmer: Jaime David Briones Torres
 
