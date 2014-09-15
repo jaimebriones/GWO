@@ -6,8 +6,8 @@ GWOC: RngStream.o GWO-C.o
 RngStream.o: RngStream.c
 	g++ -c RngStream.c
 
-GWO-C.o: GWO-C.cpp
-	g++ -c GWO-C.cpp
+GWO-C.o: GWO-C.c
+	g++ -c GWO-C.c
 
 clean:
 	rm -rf *o GWOC
